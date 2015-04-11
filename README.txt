@@ -27,7 +27,7 @@ hoverbot.mimic_player needs a proper way to exit gracefully when a mod tries to
 use a function that is not defined; currently things like player:set_breath()
 will cause the server to crash.
 
-=========================================================================================
+===============================================================================
 
 Licenses:
 code -- WTFPL
