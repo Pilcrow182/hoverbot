@@ -8,10 +8,13 @@ Introduction:
 This mod adds a programmable robot to the minetest game. It can mimic a player
 in many ways but still has some glaring bugs.
 
+Depends:
+Default (for the crafting recipies)
+
 How to install:
-Unzip the archive an place it in minetest-base-directory/mods/minetest/
+Unzip the archive and place it in minetest-base-directory/mods/
 if you have a windows client or a linux run-in-place client. If you have
-a linux system-wide instalation place it in ~/.minetest/mods/minetest/.
+a linux system-wide instalation place it in ~/.minetest/mods/.
 If you want to install this mod only in one world create the folder
 worldmods/ in your worlddirectory.
 For further information or help see:
