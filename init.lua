@@ -287,7 +287,7 @@ minetest.register_node("hoverbot:hoverbot", {
 		if fields.dump  then hoverbot.dump_fuel(pos, sender) end
 		for pagenum=0,#pagenames-1 do
 			if fields["page"..pagenum] then 
-				hoverbot.make_interface(pos,hoverbot["page"..pagenum],0,0)
+				hoverbot.make_interface(pos,hoverbot["page"..pagenum],0,pagenum)
 				break
 			end
 		end
