@@ -3,71 +3,69 @@ hoverbot = {}
 dofile(minetest.get_modpath("hoverbot").."/command_items.lua")
 dofile(minetest.get_modpath("hoverbot").."/components.lua")
 dofile(minetest.get_modpath("hoverbot").."/crafts.lua")
+dofile(minetest.get_modpath("hoverbot").."/mimic_player.lua")
 dofile(minetest.get_modpath("hoverbot").."/exec.lua")
 dofile(minetest.get_modpath("hoverbot").."/compat.lua")
 
-local tabsize = 2
+local codepages = 5 -- this *must* be 5, but will be configurable "eventually"
+local offset = 0.40
 
-hoverbot.tab0 = "button["..tostring(tabsize*0)..",0;"..tostring(tabsize)..",1;page0;Inventory]"									-- inventory button
-hoverbot.tab1 = "button["..tostring(tabsize*1)..",0;"..tostring(tabsize)..",1;page1;Codepage1]"									-- codepage1 button
-hoverbot.tab2 = "button["..tostring(tabsize*2)..",0;"..tostring(tabsize)..",1;page2;Codepage2]"									-- codepage2 button
-hoverbot.tab3 = "button["..tostring(tabsize*3)..",0;"..tostring(tabsize)..",1;page3;Codepage3]"									-- codepage3 button
-hoverbot.tab4 = "button["..tostring(tabsize*4)..",0;"..tostring(tabsize)..",1;page4;Codepage4]"									-- codepage4 button
-hoverbot.tab5 = "button["..tostring(tabsize*5)..",0;"..tostring(tabsize)..",1;page5;Codepage5]"									-- codepage5 button
+-- These are more codepages and offset values. I'm trying to find a pattern..
+-- NOTE: ignore this for now; the number of codepages is not configurable yet
+--  1 =  2.5
+--  2 =  1.5
+--  3 =  1
+--  4 =  0.5
+--  5 =  0.4
+--  6 =  0.25
+--  7 =  0.1
+--  8 =  0
+--  9 = -0.1
+-- 10 = -0.1
+-- 11 = -0.1
 
-hoverbot.page0 = 	"label["..tostring(tabsize*0+0.4)..",0.1;Inventory]"..hoverbot.tab1..hoverbot.tab2..hoverbot.tab3..hoverbot.tab4..hoverbot.tab5..	-- page ribbon
-			"label[2.5,1;Hoverbot's Inventory:]"..													-- bot inventory label
-			"list[current_name;main;2,1.5;8,1;]"..													-- bot inventory
-			"label[5.65,3.0;Fuel:]"..														-- fuel label
-			"list[current_name;fuel;5.5,3.5;1,1;]"..												-- fuel slot
-			"button[5,4.3;2,1;dump;Dump]"..														-- fuel dump button
-			"label[2.5,5.5;Your Inventory:]"..													-- player inventory label
-			"list[current_player;main;2,6;8,4;]"													-- player inventory
+local pagenames = {"Inventory"}
+for p = 2, codepages + 1 do pagenames[p] = "Codepage"..tostring(p - 1) end
 
-hoverbot.page1 = 	hoverbot.tab0.."label["..tostring(tabsize*1+0.3)..",0.1;Codepage1]"..hoverbot.tab2..hoverbot.tab3..hoverbot.tab4..hoverbot.tab5..	-- page ribbon
-			"label[0.5,1;Current Code:]"..														-- codebox 1 label
-			"list[current_name;codebox1;0,1.5;11,4;]"..												-- codebox 1 inventory
-			"label[11.1,2;Trash:]"..														-- trash label
-			"list[current_name;trash;11,2.5;1,1;]"..												-- trash slot
-			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..										-- clear button
-			"label[0.5,5.5;Available Commands:]"..													-- commands label
-			"list[current_name;cmd_bank;0,6;12,4;]"													-- commands inventory
+local make_ribbon = function(pagenum, last_tab, tabsize)
+	local ribbon = ""
+	for tabnum= 0, last_tab do
+		local label = pagenames[tabnum+1]
+		if tabnum == pagenum then
+			ribbon = ribbon.."label["..tostring(tabsize * tabnum + offset)..",0.2;"..label.."]"
+		else
+			ribbon = ribbon.."button["..tostring(tabsize * tabnum)..",0;"..tostring(tabsize)..",1;page"..tabnum..";"..label.."]"
+		end
+	end
+	return ribbon
+end
 
-hoverbot.page2 = 	hoverbot.tab0..hoverbot.tab1.."label["..tostring(tabsize*2+0.3)..",0.1;Codepage2]"..hoverbot.tab3..hoverbot.tab4..hoverbot.tab5..	-- page ribbon
-			"label[0.5,1;Current Code:]"..														-- codebox 2 label
-			"list[current_name;codebox2;0,1.5;11,4;]"..												-- codebox 2 inventory
-			"label[11.1,2;Trash:]"..														-- trash label
-			"list[current_name;trash;11,2.5;1,1;]"..												-- trash slot
-			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..										-- clear button
-			"label[0.5,5.5;Available Commands:]"..													-- commands label
-			"list[current_name;cmd_bank;0,6;12,4;]"													-- commands inventory
+local make_page = function(pagenum, last_tab, tabsize)
+	local ribbon = make_ribbon(pagenum, last_tab, tabsize)
+	if pagenum == 0 then
+		hoverbot["page"..pagenum] = ribbon..					-- page ribbon
+			"label[2.5,1;Hoverbot's Inventory:]"..				-- bot inventory label
+			"list[current_name;main;2,1.5;8,1;]"..				-- bot inventory
+			"label[5.65,3.0;Fuel:]"..					-- fuel label
+			"list[current_name;fuel;5.5,3.5;1,1;]"..			-- fuel slot
+			"button[5,4.3;2,1;dump;Dump]"..					-- fuel dump button
+			"label[2.5,5.5;Your Inventory:]"..				-- player inventory label
+			"list[current_player;main;2,6;8,4;]"				-- player inventory
+	else
+		hoverbot["page"..pagenum] = ribbon..					-- page ribbon
+			"label[0.5,1;Current Code:]"..					-- codebox label
+			"list[current_name;codebox"..pagenum..";0,1.5;11,4;]"..		-- codebox inventory
+			"label[11.1,2;Trash:]"..					-- trash label
+			"list[current_name;trash;11,2.5;1,1;]"..			-- trash slot
+			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..	-- clear button
+			"label[0.5,5.5;Available Commands:]"..				-- commands label
+			"list[current_name;cmd_bank;0,6;12,4;]"				-- commands inventory
+	end
+end
 
-hoverbot.page3 = 	hoverbot.tab0..hoverbot.tab1..hoverbot.tab2.."label["..tostring(tabsize*3+0.3)..",0.1;Codepage3]"..hoverbot.tab4..hoverbot.tab5..	-- page ribbon
-			"label[0.5,1;Current Code:]"..														-- codebox 3 label
-			"list[current_name;codebox3;0,1.5;11,4;]"..												-- codebox 3 inventory
-			"label[11.1,2;Trash:]"..														-- trash label
-			"list[current_name;trash;11,2.5;1,1;]"..												-- trash slot
-			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..										-- clear button
-			"label[0.5,5.5;Available Commands:]"..													-- commands label
-			"list[current_name;cmd_bank;0,6;12,4;]"													-- commands inventory
-
-hoverbot.page4 = 	hoverbot.tab0..hoverbot.tab1..hoverbot.tab2..hoverbot.tab3.."label["..tostring(tabsize*4+0.3)..",0.1;Codepage4]"..hoverbot.tab5..	-- page ribbon
-			"label[0.5,1;Current Code:]"..														-- codebox 4 label
-			"list[current_name;codebox4;0,1.5;11,4;]"..												-- codebox 4 inventory
-			"label[11.1,2;Trash:]"..														-- trash label
-			"list[current_name;trash;11,2.5;1,1;]"..												-- trash slot
-			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..										-- clear button
-			"label[0.5,5.5;Available Commands:]"..													-- commands label
-			"list[current_name;cmd_bank;0,6;12,4;]"													-- commands inventory
-
-hoverbot.page5 = 	hoverbot.tab0..hoverbot.tab1..hoverbot.tab2..hoverbot.tab3..hoverbot.tab4.."label["..tostring(tabsize*5+0.3)..",0.1;Codepage5]"..	-- page ribbon
-			"label[0.5,1;Current Code:]"..														-- codebox 5 label
-			"list[current_name;codebox5;0,1.5;11,4;]"..												-- codebox 5 inventory
-			"label[11.1,2;Trash:]"..														-- trash label
-			"list[current_name;trash;11,2.5;1,1;]"..												-- trash slot
-			"item_image_button[11,3.5;1,1;hoverbot:cmd_clear;clear;]"..										-- clear button
-			"label[0.5,5.5;Available Commands:]"..													-- commands label
-			"list[current_name;cmd_bank;0,6;12,4;]"													-- commands inventory
+for p = 1, #pagenames do
+	make_page(p - 1, #pagenames - 1, 12 / #pagenames)
+end
 
 hoverbot.nodebox_shape = {
 	{-13/32,  6/32, -8/32, 13/32,  8/32,  8/32},  -- outer_hull_NS2
@@ -130,26 +128,6 @@ hoverbot.clear_trash = function(pos)
 	local inv = meta:get_inventory()
 	inv:set_stack("trash", 1, nil)
 end
-
---  this is a backup of the old add_fuel function, in case the new one causes problems
---[[
-hoverbot.add_fuel = function(pos)
-	local fueltype = "hoverbot:fuel"
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	local inputstack = inv:get_stack("fuel", 1)
-	local input = inputstack:get_count()
-	local fuel = tonumber(meta:get_string("fuel")) or 0
-	local time = minetest.get_craft_result({method="fuel",width=1,items={inputstack}}).time
-	local addfuel = math.ceil(time/2) * input
-
-	if addfuel == 0 then return false end
-
-	if fuel + addfuel > minetest.registered_items[fueltype].stack_max then return false end
-	inv:set_stack("fuel", 1, nil)
-	meta:set_string("fuel", fuel + addfuel)
-end
---]]
 
 hoverbot.add_fuel = function(pos)
 	local fueltype = "hoverbot:fuel"
@@ -219,11 +197,11 @@ hoverbot.make_interface = function(pos, display, shutoff, page)
 
 	local inv = meta:get_inventory()
 	inv:set_size("main", 8*1)
-	inv:set_size("codebox1", 11*4)
-	inv:set_size("codebox2", 11*4)
-	inv:set_size("codebox3", 11*4)
-	inv:set_size("codebox4", 11*4)
-	inv:set_size("codebox5", 11*4)
+	for p=1,#pagenames do
+		if string.find(pagenames[p], "Codepage") then
+			inv:set_size("codebox"..p-1, 11*4)
+		end
+	end
 	inv:set_size("cmd_bank", 12*4)
 	inv:set_size("trash", 1*1)
 	inv:set_size("fuel", 1*1)
@@ -237,12 +215,6 @@ end
 hoverbot.swap_node = function(pos, nodename)
 	if minetest.get_node(pos).name == nodename then return end
 	local p2 = minetest.get_node(pos).param2
---[[
-	local meta = minetest.get_meta(pos)
-	local meta0 = meta:to_table()
-	minetest.set_node(pos, {name=nodename, param2=p2})
-	meta:from_table(meta0)
---]]
 	minetest.swap_node(pos, {name = nodename, param2 = p2})
 end
 
@@ -313,23 +285,20 @@ minetest.register_node("hoverbot:hoverbot", {
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
 		if fields.dump  then hoverbot.dump_fuel(pos, sender) end
-		if fields.page0 then hoverbot.make_interface(pos,hoverbot.page0,0,0) end
-		if fields.page1 then hoverbot.make_interface(pos,hoverbot.page1,0,1) end
-		if fields.page2 then hoverbot.make_interface(pos,hoverbot.page2,0,2) end
-		if fields.page3 then hoverbot.make_interface(pos,hoverbot.page3,0,3) end
-		if fields.page4 then hoverbot.make_interface(pos,hoverbot.page4,0,4) end
-		if fields.page5 then hoverbot.make_interface(pos,hoverbot.page5,0,5) end
+		for pagenum=0,#pagenames-1 do
+			if fields["page"..pagenum] then 
+				hoverbot.make_interface(pos,hoverbot["page"..pagenum],0,0)
+				break
+			end
+		end
 		if fields.clear then hoverbot.clear_code(pos) end
 	end,
 	allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		if (from_list == "main" or from_list == "fuel")
-		and (to_list == "main" or to_list == "fuel") then
+		if (from_list == "main" or from_list == "fuel") and (to_list == "main" or to_list == "fuel") then
 			return count or 1
-		elseif from_list == "cmd_bank"
-		and (to_list == "trash" or to_list == "codebox1" or to_list == "codebox2" or to_list == "codebox3" or to_list == "codebox4" or to_list == "codebox5") then
+		elseif from_list == "cmd_bank" and (to_list == "trash" or string.find(to_list, "codebox")) then
 			return count or 1
-		elseif (from_list == "codebox1" or from_list == "codebox2" or from_list == "codebox3" or from_list == "codebox4" or from_list == "codebox5")
-		and (to_list == "trash" or to_list == "codebox1" or to_list == "codebox2" or to_list == "codebox3" or to_list == "codebox4" or to_list == "codebox5") then
+		elseif string.find(from_list, "codebox") and (to_list == "trash" or string.find(to_list, "codebox")) then
 			return count or 1
 		else
 			return 0
