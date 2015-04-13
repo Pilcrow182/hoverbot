@@ -6,6 +6,7 @@ local debug_log = function(output)
 	minetest.chat_send_all("HOVERBOT:: DEBUG: "..output)
 end
 
+--[[
 hoverbot.mimic_player = function(pos)
 	local player = {
 		is_player = function() return true end,
@@ -26,6 +27,7 @@ hoverbot.mimic_player = function(pos)
 	}
 	return player
 end
+--]]
 
 hoverbot.item_pickup = function(pos, inv)
 	for _,object in ipairs(minetest.get_objects_inside_radius(pos, 1)) do
@@ -496,9 +498,9 @@ hoverbot.exec_functions = {
 	-- misc
 	["hoverbot:cmd_drop"] = function(pos) hoverbot.drop(pos) end,
 	["hoverbot:cmd_delete"] = function(pos) hoverbot.delete(pos) end,
-	["hoverbot:cmd_consume"] = function(pos) hoverbot.consume(pos) end,
 	["hoverbot:cmd_sleep"] = function(pos) hoverbot.sleep() end,
-	["hoverbot:cmd_shutdown"] = function(pos) hoverbot.shutdown(pos) end,
+	["hoverbot:cmd_upload"] = function(pos) hoverbot.upload(pos) end,
+	["hoverbot:cmd_download"] = function(pos) hoverbot.download(pos) end,
 }
 
 hoverbot.exec_loop = function(pos)
