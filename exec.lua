@@ -6,29 +6,6 @@ local debug_log = function(output)
 	minetest.chat_send_all("HOVERBOT:: DEBUG: "..output)
 end
 
---[[
-hoverbot.mimic_player = function(pos)
-	local player = {
-		is_player = function() return true end,
-		get_player_name = function() return "hoverbot" end,
-		getpos = function() return pos end,
-		get_player_control = function() return {jump=false,right=false,left=false,LMB=false,RMB=false,sneak=false,aux1=false,down=false,up=false} end,
-		get_inventory = function() return minetest.get_meta(pos):get_inventory() end,
-		get_wielded_item = function() return minetest.get_meta(pos):get_inventory():get_stack("main", tonumber(minetest.get_meta(pos):get_string("inv_slot"))) end,
-		set_wielded_item = function (self, newstack) return minetest.get_meta(pos):get_inventory():set_stack("main", tonumber(minetest.get_meta(pos):get_string("inv_slot")), newstack) end,
-		get_wield_index = function() return tonumber(minetest.get_meta(pos):get_string("inv_slot")) end,
-		get_look_pitch = function() return 0 end,
-		get_look_dir = function() return {x=0,y=0,z=0} end,
-		get_hp = function() return 20 end,
-		set_hp = function() return end,
-		set_physics_override = function() return end,
-		setpos = function() return end,
-		moveto = function() return end,
-	}
-	return player
-end
---]]
-
 hoverbot.item_pickup = function(pos, inv)
 	for _,object in ipairs(minetest.get_objects_inside_radius(pos, 1)) do
 		if not object:is_player() and object:get_luaentity() and object:get_luaentity().name == "__builtin:item" then
@@ -80,12 +57,6 @@ hoverbot.rotate_self = function(botpos, facepos)
 		debug_log("did not rotate "..minetest.get_node(botpos).name.."; old_p2 ("..old_p2..") matches dir ("..dir..")")
 		return true
 	end
---[[
-	local meta = minetest.get_meta(botpos)
-	local meta0 = meta:to_table()
-	minetest.set_node(botpos, {name="hoverbot:hoverbot_active", param2=dir})
-	meta:from_table(meta0)
---]]
 	minetest.swap_node(botpos, {name="hoverbot:hoverbot_active", param2=dir})
 end
 

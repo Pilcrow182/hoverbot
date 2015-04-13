@@ -1,15 +1,3 @@
---[[
-Item default:diamond
-Item default:mese_crystal
-Item default:gold_ingot 6
-Item default:steel_ingot 40
-Item default:copper_ingot 37
-Item default:sand 16
-Item default:coal_lump
-Item default:cobble
-Item default:tree 3
---]]
-
 minetest.register_craft({
 	output = 'hoverbot:hoverbot',
 	recipe = {
