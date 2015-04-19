@@ -1,4 +1,4 @@
-Hoverbot mod, by Pilcrow, version 0.5
+Hoverbot mod, by Pilcrow, version 0.5.1
 
 ###############################################################################
  ALERT:  This is a -WIP- version of the hoverbot mod. IT MAY EAT YOUR HAMSTER!
@@ -6,7 +6,10 @@ Hoverbot mod, by Pilcrow, version 0.5
 
 Introduction:
 This mod adds a programmable robot to the minetest game. It can mimic a player
-in many ways but still has some glaring bugs.
+in many ways, and shouldn't have many bugs left, but the mimic_player functions
+may not all be properly implemented and might cause crashes under some rare
+circumstances. Please report any issues at the hoverbot github page:
+https://github.com/Pilcrow182/hoverbot
 
 Depends:
 Default (for the crafting recipies)
@@ -26,9 +29,11 @@ Just install it an everything works.
 ===============================================================================
 
 Known bugs:
-hoverbot.mimic_player needs a proper way to exit gracefully when a mod tries to
-use a function that is not defined; currently things like player:set_breath()
-will cause the server to crash.
+hoverbot.mimic_player covers all documented player functions, but some may not
+return the expected output, so crashes may still happen. Ideally, I'd like to
+find a way to exit gracefully when a mod tries to use a function that isn't
+defined, especially if any undocumented player functions exist; making a
+hoverbot use an item that executes an undocumented function WILL cause a crash.
 
 ===============================================================================
 

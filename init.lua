@@ -11,18 +11,18 @@ local codepages = 5 -- this *must* be 5, but will be configurable "eventually"
 local offset = 0.40
 
 -- These are more codepages and offset values. I'm trying to find a pattern..
--- NOTE: ignore this for now; the number of codepages is not configurable yet
---  1 =  2.5
---  2 =  1.5
---  3 =  1
---  4 =  0.5
---  5 =  0.4
---  6 =  0.25
---  7 =  0.1
---  8 =  0
---  9 = -0.1
--- 10 = -0.1
--- 11 = -0.1
+-- NOTE: ignore this for now; the number of codepages is not fully configurable
+--  1 ~  2.5
+--  2 ~  1.5
+--  3 ~  1
+--  4 ~  0.5
+--  5 ~  0.4
+--  6 ~  0.25
+--  7 ~  0.1
+--  8 ~  0
+--  9 ~ -0.1
+-- 10 ~ -0.1
+-- 11 ~ -0.1
 
 local pagenames = {"Inventory"}
 for p = 2, codepages + 1 do pagenames[p] = "Codepage"..tostring(p - 1) end
@@ -67,6 +67,7 @@ for p = 1, #pagenames do
 	make_page(p - 1, #pagenames - 1, 12 / #pagenames)
 end
 
+-- the nodebox model will be replaced with a mesh by Ecutruin when I figure out how to properly texture it
 hoverbot.nodebox_shape = {
 	{-13/32,  6/32, -8/32, 13/32,  8/32,  8/32},  -- outer_hull_NS2
 	{-12/32,  6/32,-10/32, 12/32,  8/32, 10/32},  -- outer_hull_NS
@@ -368,11 +369,12 @@ minetest.register_node("hoverbot:hoverbot_active", {
 	},
 	on_receive_fields = function(pos, formname, fields, sender)
 		if fields.dump  then hoverbot.dump_fuel(pos, sender) end
-		if fields.page1 then hoverbot.make_interface(pos,hoverbot.page1,1,1) end
-		if fields.page2 then hoverbot.make_interface(pos,hoverbot.page2,1,2) end
-		if fields.page3 then hoverbot.make_interface(pos,hoverbot.page3,1,3) end
-		if fields.page4 then hoverbot.make_interface(pos,hoverbot.page4,1,4) end
-		if fields.page5 then hoverbot.make_interface(pos,hoverbot.page5,1,5) end
+		for pagenum=0,#pagenames-1 do
+			if fields["page"..pagenum] then 
+				hoverbot.make_interface(pos,hoverbot["page"..pagenum],1,pagenum)
+				break
+			end
+		end
 	end,
 	allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
 		if (from_list == "main" or from_list == "fuel")
