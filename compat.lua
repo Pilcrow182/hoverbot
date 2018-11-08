@@ -1,3 +1,10 @@
+-- checking for nodeupdate and replacing it with minetest.check_for_falling() to retain backwards compatibility
+if not nodeupdate then
+	nodeupdate = function(pos)
+		return minetest.check_for_falling(pos)
+	end
+end
+
 hoverbot.compat = {
 	["before_rightclick"] = function(pos, node, player, itemstack, pointed_thing)
 		return

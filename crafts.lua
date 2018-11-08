@@ -20,7 +20,7 @@ minetest.register_craft({
 	output = 'hoverbot:optical_lense',
 	recipe = {
 		{'', 'default:glass', ''},
-		{'default:glass', 'default:glass', 'default:glass'},
+		{'default:glass', '', 'default:glass'},
 	}
 })
 

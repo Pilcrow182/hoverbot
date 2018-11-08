@@ -131,18 +131,19 @@ hoverbot.clear_trash = function(pos)
 end
 
 hoverbot.add_fuel = function(pos)
-	local fueltype = "hoverbot:fuel"
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local inputstack = inv:get_stack("fuel", 1)
+	local time = minetest.get_craft_result({method="fuel",width=1,items={inputstack}}).time
+
+	if time == 0 then return false end
+
+	local fueltype = "hoverbot:fuel"
 	local input = inputstack:get_count()
 	local fuel = tonumber(meta:get_string("fuel")) or 0
 	local fuelmax = minetest.registered_items[fueltype].stack_max
-	local time = minetest.get_craft_result({method="fuel",width=1,items={inputstack}}).time
 	local addfuel = math.ceil(time/2)
 
-	if input == 0 then return false end
-	
 	local subcount = 0
 	while subcount < input and fuel + (addfuel * (subcount + 1)) <= fuelmax do subcount = subcount + 1 end
 	if subcount == 0 then return false end

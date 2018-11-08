@@ -1,4 +1,4 @@
-Hoverbot mod, by Pilcrow, version 0.5.1
+Hoverbot mod, by Pilcrow, version 0.5.2
 
 ###############################################################################
  ALERT:  This is a -WIP- version of the hoverbot mod. IT MAY EAT YOUR HAMSTER!
